@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Assessment Benchmark - Code Completion</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        editor: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155',
+                            text: '#e2e8f0',
+                            accent: '#38bdf8',
+                            keyword: '#c084fc',
+                            string: '#4ade80',
+                            number: '#f76b15'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, pre, input.code-input { font-family: 'Fira Code', monospace; }
+        .token-keyword { color: #c084fc; font-weight: 600; }
+        .token-string { color: #4ade80; }
+        .token-number { color: #f472b6; }
+        .token-comment { color: #64748b; font-style: italic; }
+        .token-fn { color: #38bdf8; }
+        .token-op { color: #f59e0b; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-sky-500 to-indigo-500 p-2 rounded-xl text-slate-950 font-bold text-lg shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-terminal text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide text-white">Python Fill-in-the-Blank Benchmark</h1>
+                    <p class="text-xs text-slate-400">20 Randomized Section-Balanced Questions</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div id="streakBadge" class="hidden items-center space-x-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-lg text-xs font-semibold">
+                    <i class="fa-solid fa-fire animate-bounce"></i>
+                    <span>Streak: <span id="streakCount">0</span></span>
+                </div>
+                <button id="soundToggle" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="Toggle Audio">
+                    <i class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+                <div id="timerContainer" class="hidden flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-sky-400 text-sm"></i>
+                    <span id="timerText" class="font-mono text-sm font-semibold text-slate-200">00:00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow flex flex-col justify-center">
+
+        <!-- START SCREEN -->
+        <div id="startScreen" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl backdrop-blur">
+            <div class="text-center max-w-2xl mx-auto">
+                <div class="inline-flex items-center space-x-2 bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold px-3 py-1 rounded-full mb-6">
+                    <i class="fa-solid fa-code"></i>
+                    <span>20 Questions per Session • Structured Section Breakdown</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4 tracking-tight">Python Code Assessment Game</h2>
+                <p class="text-slate-300 mb-6 leading-relaxed text-sm sm:text-base">
+                    Every game generates a fresh 20-question challenge randomly sampled according to section quotas:
+                </p>
+
+                <!-- Section Quota Checklist -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left mb-8 font-mono text-xs">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-slate-300">2. Numeric operations</span>
+                        <span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded font-bold">2 Qs</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-slate-300">3. String operations</span>
+                        <span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded font-bold">3 Qs</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-slate-300">4. Boolean operations</span>
+                        <span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded font-bold">2 Qs</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-slate-300">5. Variables & data types</span>
+                        <span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded font-bold">3 Qs</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-slate-300">6. Collections</span>
+                        <span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded font-bold">4 Qs</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-slate-300">7. Control flow statements</span>
+                        <span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded font-bold">3 Qs</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center sm:col-span-2">
+                        <span class="text-slate-300">8. Functions</span>
+                        <span class="bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded font-bold">3 Qs</span>
+                    </div>
+                </div>
+
+                <button id="startBtn" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-sky-500/20 transition transform hover:-translate-y-0.5">
+                    Start Assessment Session <i class="fa-solid fa-play ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- QUIZ SCREEN -->
+        <div id="quizScreen" class="hidden flex-col space-y-6">
+            <!-- Progress Bar -->
+            <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl">
+                <div class="flex justify-between items-center text-xs font-semibold text-slate-400 mb-2">
+                    <span id="questionCounter">Snippet 1 of 20</span>
+                    <span id="categoryBadge" class="bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2.5 py-0.5 rounded-full uppercase tracking-wider text-[10px]">2. Numeric operations</span>
+                </div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-sky-500 to-indigo-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <!-- Code Editor Card -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur">
+                <!-- Editor Topbar -->
+                <div class="bg-slate-950/80 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+                        <span class="ml-2 text-xs font-mono text-slate-400" id="editorFileName">assessment.py</span>
+                    </div>
+                    <button id="hintBtn" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center space-x-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg transition">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>Hint</span>
+                    </button>
+                </div>
+
+                <!-- Code Workspace -->
+                <div class="p-6 font-mono text-sm sm:text-base leading-relaxed text-slate-200 bg-slate-950/60">
+                    <div id="codeDisplay" class="space-y-2"></div>
+
+                    <!-- Target Output Box -->
+                    <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center space-x-3 text-xs sm:text-sm">
+                        <span class="text-slate-500 uppercase font-semibold text-[10px] tracking-wider bg-slate-900 px-2 py-1 rounded border border-slate-800">Expected Output</span>
+                        <code id="expectedOutput" class="text-emerald-400 font-bold">123</code>
+                    </div>
+                </div>
+
+                <!-- Interactive Input & Controls -->
+                <div class="p-6 bg-slate-900 border-t border-slate-800 space-y-4">
+                    <form id="answerForm" class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-grow">
+                            <input type="text" id="userInput" autocomplete="off" spellcheck="false" placeholder="Type answer for ??? here..." 
+                                class="code-input w-full bg-slate-950 border-2 border-slate-700 focus:border-sky-500 text-white px-4 py-3 rounded-xl text-sm outline-none transition font-mono placeholder:text-slate-600">
+                        </div>
+                        <button type="submit" id="submitBtn" class="px-6 py-3 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl transition flex items-center justify-center space-x-2 text-sm shadow-lg shadow-sky-500/20">
+                            <span>Execute</span>
+                            <i class="fa-solid fa-play text-xs"></i>
+                        </button>
+                    </form>
+
+                    <!-- Hint Box -->
+                    <div id="hintBox" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs leading-relaxed">
+                        <i class="fa-solid fa-lightbulb mr-1.5"></i> <span id="hintText"></span>
+                    </div>
+
+                    <!-- Feedback Box -->
+                    <div id="feedbackBox" class="hidden p-4 rounded-xl border text-xs sm:text-sm leading-relaxed transition-all duration-200"></div>
+
+                    <!-- Next Button -->
+                    <div id="nextContainer" class="hidden justify-end">
+                        <button id="nextBtn" class="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded-xl transition flex items-center space-x-2 text-sm shadow-lg shadow-indigo-500/20">
+                            <span>Next Snippet</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTS DASHBOARD -->
+        <div id="resultsScreen" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl backdrop-blur">
+            <div class="text-center mb-6">
+                <div id="scoreBadge" class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-950 border-4 border-sky-500 mb-4 text-3xl font-extrabold text-white">
+                    0%
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Assessment Completed!</h2>
+                <p id="resultMessage" class="text-slate-400 text-sm mt-1">Section performance & accuracy breakdown.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center">
+                    <p class="text-[10px] text-slate-500 uppercase font-semibold tracking-wider mb-1">Total Score</p>
+                    <p id="scoreText" class="text-2xl font-bold text-sky-400">0 / 20</p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center">
+                    <p class="text-[10px] text-slate-500 uppercase font-semibold tracking-wider mb-1">Max Streak</p>
+                    <p id="maxStreakText" class="text-2xl font-bold text-amber-400">0</p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center">
+                    <p class="text-[10px] text-slate-500 uppercase font-semibold tracking-wider mb-1">Completion Time</p>
+                    <p id="timeTakenText" class="text-2xl font-bold text-emerald-400">00:00</p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center">
+                    <p class="text-[10px] text-slate-500 uppercase font-semibold tracking-wider mb-1">Level</p>
+                    <p id="proficiencyText" class="text-base font-bold text-indigo-400 truncate">Novice</p>
+                </div>
+            </div>
+
+            <!-- Section Breakdown List -->
+            <div class="mb-8">
+                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3">Performance by Section</h3>
+                <div id="sectionBreakdownContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono"></div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button id="reviewBtn" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition flex items-center justify-center space-x-2 text-sm">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Review Answer Breakdown</span>
+                </button>
+                <button id="restartBtn" class="px-6 py-3 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-sky-500/20 flex items-center justify-center space-x-2 text-sm">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Play Again (New Questions)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- REVIEW SCREEN -->
+        <div id="reviewScreen" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Answer Key & Breakdown</h2>
+                    <p class="text-xs text-slate-400">Review all 20 code completion challenges</p>
+                </div>
+                <button id="backToResultsBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-200 transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Back to Stats
+                </button>
+            </div>
+
+            <div id="reviewQuestionsList" class="space-y-4"></div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 py-4 text-center text-xs text-slate-600">
+        <p>Python Code Assessment Benchmark • Exact Section Sampling Engine</p>
+    </footer>
+
+    <!-- Script -->
+    <script>
+        // Master Question Bank organized by sections
+        const MASTER_QUESTION_BANK = {
+            "2. Numeric operations": [
+                {
+                    codeLines: ['a = 17', 'result = a ??? 5', 'print(result)'],
+                    output: '3',
+                    validAnswers: ["//"],
+                    hint: "Use floor division operator.",
+                    explanation: "Floor division `//` divides numbers and rounds down to the nearest integer (17 // 5 = 3)."
+                },
+                {
+                    codeLines: ['x = 5', 'result = x ??? 3', 'print(result)'],
+                    output: '125',
+                    validAnswers: ["**"],
+                    hint: "Which arithmetic operator represents exponentiation / power?",
+                    explanation: "The `**` operator calculates exponentiation (5 ** 3 = 125)."
+                },
+                {
+                    codeLines: ['a = 23', 'result = a ??? 5', 'print(result)'],
+                    output: '3',
+                    validAnswers: ["%"],
+                    hint: "Which operator returns the remainder of division?",
+                    explanation: "The modulo operator `%` calculates the remainder of division (23 % 5 = 3)."
+                },
+                {
+                    codeLines: ['val = -9.8', 'result = ???(val)', 'print(result)'],
+                    output: '9.8',
+                    validAnswers: ["abs"],
+                    hint: "Built-in function for magnitude / absolute value.",
+                    explanation: "`abs(x)` converts negative numeric values to positive."
+                },
+                {
+                    codeLines: ['val = 3.14159', 'result = ???(val, 2)', 'print(result)'],
+                    output: '3.14',
+                    validAnswers: ["round"],
+                    hint: "Built-in function to round a number to given decimal places.",
+                    explanation: "`round(val, 2)` rounds a float to 2 decimal places."
+                }
+            ],
+            "3. String operations": [
+                {
+                    codeLines: ['s = "Python"', 'result = s[???]', 'print(result)'],
+                    output: "'nohtyP'",
+                    validAnswers: ["::-1"],
+                    hint: "Use slice notation `[start:stop:step]` to reverse the string.",
+                    explanation: "`[::-1]` steps backward through a string, reversing it."
+                },
+                {
+                    codeLines: ['text = "  hello world  "', 'result = text.???()', 'print(result)'],
+                    output: "'hello world'",
+                    validAnswers: ["strip"],
+                    hint: "String method that strips whitespace from surrounding sides.",
+                    explanation: "`.strip()` removes leading and trailing whitespace characters."
+                },
+                {
+                    codeLines: ['raw = "apple,banana,orange"', 'result = raw.???(",")', 'print(result)'],
+                    output: "['apple', 'banana', 'orange']",
+                    validAnswers: ["split"],
+                    hint: "Method that breaks a string into a list based on delimiter.",
+                    explanation: "`.split(',')` parses delimited strings into a list."
+                },
+                {
+                    codeLines: ['items = ["a", "b", "c"]', 'result = "-".???(items)', 'print(result)'],
+                    output: "'a-b-c'",
+                    validAnswers: ["join"],
+                    hint: "String method that joins iterable elements using separator string.",
+                    explanation: "`delimiter.join(iterable)` concatenates string elements."
+                },
+                {
+                    codeLines: ['msg = "Hello World"', 'result = msg.???("World", "Python")', 'print(result)'],
+                    output: "'Hello Python'",
+                    validAnswers: ["replace"],
+                    hint: "String method that replaces occurrences of substring.",
+                    explanation: "`.replace(old, new)` substitutes substrings."
+                }
+            ],
+            "4. Boolean operations": [
+                {
+                    codeLines: ['a, b = True, False', 'result = a ??? b', 'print(result)'],
+                    output: 'False',
+                    validAnswers: ["and", "is", "=="],
+                    hint: "Logical operator that returns True only if both operands are True.",
+                    explanation: "`and` evaluates True only when both expressions are truthy."
+                },
+                {
+                    codeLines: ['x = []', 'result = ???(x)', 'print(result)'],
+                    output: 'False',
+                    validAnswers: ["bool"],
+                    hint: "Type conversion function to test truthiness of empty list.",
+                    explanation: "Empty collections in Python evaluate to `False` when passed to `bool()`."
+                },
+                {
+                    codeLines: ['a = True', 'result = ??? a', 'print(result)'],
+                    output: 'False',
+                    validAnswers: ["not"],
+                    hint: "Logical operator that negates a boolean value.",
+                    explanation: "`not` flips boolean value `True` to `False`."
+                },
+                {
+                    codeLines: ['x = 10', 'result = 5 < x ??? x < 20', 'print(result)'],
+                    output: 'True',
+                    validAnswers: ["and"],
+                    hint: "Logical operator connecting both valid inequalities.",
+                    explanation: "Both `5 < 10` and `10 < 20` are True, so `and` evaluates to `True`."
+                }
+            ],
+            "5. Variables and data types": [
+                {
+                    codeLines: ['a = "123.4"', 'result = ???', 'print(result)'],
+                    output: '123',
+                    validAnswers: ["int(float(a))", "123", "int(123.4)"],
+                    hint: "Convert string float first before converting to int.",
+                    explanation: "`int('123.4')` raises ValueError. First convert using `float(a)`, then `int()`."
+                },
+                {
+                    codeLines: ['a = "123.4"', 'result = ???(float(a))', 'print(result)'],
+                    output: '123',
+                    validAnswers: ["int"],
+                    hint: "Specify only the function name.",
+                    explanation: "Only the function name `int` is needed when filled into `???(float(a))`."
+                },
+                {
+                    codeLines: ['data = [1, 2, 3]', 'result = ???(data)', 'print(result)'],
+                    output: "<class 'list'>",
+                    validAnswers: ["type"],
+                    hint: "Built-in function to inspect variable type.",
+                    explanation: "`type()` returns the class object representing the data type."
+                },
+                {
+                    codeLines: ['val = "42"', 'result = ???(val)', 'print(result)'],
+                    output: '42',
+                    validAnswers: ["int"],
+                    hint: "Function to cast integer string to int.",
+                    explanation: "`int('42')` converts integer string literal to integer type."
+                }
+            ],
+            "6. Collections": [
+                {
+                    codeLines: ['nums = [1, 2, 3, 4]', 'result = nums[???]', 'print(result)'],
+                    output: '[2, 3]',
+                    validAnswers: ["1:3", "1:-1"],
+                    hint: "Use slice start:stop indexes.",
+                    explanation: "`nums[1:3]` extracts elements from index 1 up to 3 (non-inclusive)."
+                },
+                {
+                    codeLines: ['user = {"name": "Alice"}', 'result = user.???("age", 30)', 'print(result)'],
+                    output: '30',
+                    validAnswers: ["get"],
+                    hint: "Dictionary method with fallback default value.",
+                    explanation: "`.get(key, default)` returns fallback default when key is missing."
+                },
+                {
+                    codeLines: ['nums = [1, 2, 3]', 'result = [x * 2 for x in nums if ???]', 'print(result)'],
+                    output: '[4, 6]',
+                    validAnswers: ["x > 1", "x >= 2", "x != 1"],
+                    hint: "Condition inside list comprehension filtering out 1.",
+                    explanation: "`x > 1` filters out 1, yielding doubled results for 2 and 3."
+                },
+                {
+                    codeLines: ['a = {1, 2, 3}', 'b = {3, 4, 5}', 'result = a.???(b)', 'print(result)'],
+                    output: '{3}',
+                    validAnswers: ["intersection"],
+                    hint: "Set method that returns common elements.",
+                    explanation: "`.intersection()` returns common elements between sets."
+                },
+                {
+                    codeLines: ['point = (10, 20)', 'x, y = point', 'result = ???', 'print(result)'],
+                    output: '30',
+                    validAnswers: ["x + y", "10 + 20", "30", "sum(point)"],
+                    hint: "Expression using unpacked variables x and y.",
+                    explanation: "`x` is 10 and `y` is 20; adding `x + y` returns 30."
+                }
+            ],
+            "7. Control flow statements": [
+                {
+                    codeLines: ['score = 85', 'result = "Pass" if ??? else "Fail"', 'print(result)'],
+                    output: "'Pass'",
+                    validAnswers: ["score >= 50", "score > 50", "score >= 80", "score > 80", "score == 85"],
+                    hint: "Ternary expression condition evaluated as True.",
+                    explanation: "The condition `score >= 80` evaluates to True, taking the left ternary branch."
+                },
+                {
+                    codeLines: ['total = 0', 'for i in range(4):', '    if i == 2: ???', '    total += i', 'print(total)'],
+                    output: '4',
+                    validAnswers: ["continue"],
+                    hint: "Control statement to skip remainder of iteration.",
+                    explanation: "`continue` skips adding i=2, yielding 0 + 1 + 3 = 4."
+                },
+                {
+                    codeLines: ['nums = [1, 3, 5]', 'for n in nums:', '    if n % 2 == 0:', '        break', 'else:', '    result = ???', 'print(result)'],
+                    output: "'No evens'",
+                    validAnswers: ["'No evens'", '"No evens"'],
+                    hint: "String value assigned when for...else completes without break.",
+                    explanation: "When a loop finishes without hitting `break`, the `else` clause executes."
+                },
+                {
+                    codeLines: ['x = 10', 'if x > 15:', '    r = "high"', 'elif x > 5:', '    r = ???', 'else:', '    r = "low"', 'print(r)'],
+                    output: "'mid'",
+                    validAnswers: ["'mid'", '"mid"'],
+                    hint: "Value assigned when x is 10 in elif branch.",
+                    explanation: "`10 > 5` evaluates True, executing the `elif` branch."
+                }
+            ],
+            "8. Functions": [
+                {
+                    codeLines: ['square = lambda x: ???', 'result = square(4)', 'print(result)'],
+                    output: '16',
+                    validAnswers: ["x ** 2", "x * x"],
+                    hint: "Lambda expression body returning square of x.",
+                    explanation: "`lambda x: x ** 2` creates an anonymous function returning x squared."
+                },
+                {
+                    codeLines: ['def add(a, b=5):', '    return a + b', 'result = ???(10)', 'print(result)'],
+                    output: '15',
+                    validAnswers: ["add"],
+                    hint: "Function name called with single argument 10.",
+                    explanation: "Calling `add(10)` uses default `b=5`, returning 15."
+                },
+                {
+                    codeLines: ['def total(*args):', '    return ???(args)', 'result = total(1, 2, 3, 4)', 'print(result)'],
+                    output: '10',
+                    validAnswers: ["sum"],
+                    hint: "Built-in function to sum tuple of args.",
+                    explanation: "`*args` packs parameters into a tuple; `sum(args)` calculates total."
+                },
+                {
+                    codeLines: ['def double(x):', '    ??? x * 2', 'result = double(5)', 'print(result)'],
+                    output: '10',
+                    validAnswers: ["return"],
+                    hint: "Keyword used to output result from function.",
+                    explanation: "The `return` keyword passes back function execution results."
+                }
+            ]
+        };
+
+        // Section Quotas summing to exactly 20 questions
+        const SECTION_QUOTAS = {
+            "2. Numeric operations": 2,
+            "3. String operations": 3,
+            "4. Boolean operations": 2,
+            "5. Variables and data types": 3,
+            "6. Collections": 4,
+            "7. Control flow statements": 3,
+            "8. Functions": 3
+        };
+
+        // State variables
+        let selectedQuestions = [];
+        let currentQuestionIndex = 0;
+        let userSubmissions = [];
+        let currentStreak = 0;
+        let maxStreak = 0;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let soundEnabled = true;
+
+        // Synth Audio
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'incorrect') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(174.61, now + 0.12);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(450, now);
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                }
+            } catch (e) {}
+        }
+
+        // DOM Elements
+        const startScreen = document.getElementById('startScreen');
+        const quizScreen = document.getElementById('quizScreen');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const reviewScreen = document.getElementById('reviewScreen');
+
+        const startBtn = document.getElementById('startBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const reviewBtn = document.getElementById('reviewBtn');
+        const backToResultsBtn = document.getElementById('backToResultsBtn');
+        const hintBtn = document.getElementById('hintBtn');
+        const soundToggle = document.getElementById('soundToggle');
+
+        const streakBadge = document.getElementById('streakBadge');
+        const streakCount = document.getElementById('streakCount');
+        const timerContainer = document.getElementById('timerContainer');
+        const timerText = document.getElementById('timerText');
+
+        const questionCounter = document.getElementById('questionCounter');
+        const categoryBadge = document.getElementById('categoryBadge');
+        const progressBar = document.getElementById('progressBar');
+
+        const codeDisplay = document.getElementById('codeDisplay');
+        const expectedOutput = document.getElementById('expectedOutput');
+        const answerForm = document.getElementById('answerForm');
+        const userInput = document.getElementById('userInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const hintBox = document.getElementById('hintBox');
+        const hintText = document.getElementById('hintText');
+        const feedbackBox = document.getElementById('feedbackBox');
+        const nextContainer = document.getElementById('nextContainer');
+
+        startBtn.addEventListener('click', startQuiz);
+        answerForm.addEventListener('submit', handleFormSubmit);
+        nextBtn.addEventListener('click', handleNextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+        reviewBtn.addEventListener('click', showReviewScreen);
+        backToResultsBtn.addEventListener('click', showResultsDashboard);
+
+        hintBtn.addEventListener('click', () => {
+            playSound('click');
+            const q = selectedQuestions[currentQuestionIndex];
+            hintText.textContent = q.hint;
+            hintBox.classList.toggle('hidden');
+        });
+
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.innerHTML = soundEnabled 
+                ? '<i class="fa-solid fa-volume-high text-sm"></i>' 
+                : '<i class="fa-solid fa-volume-xmark text-sm text-slate-500"></i>';
+        });
+
+        // Sample 20 questions based on section quotas
+        function generateRandomQuestionSet() {
+            let questions = [];
+            for (const [section, count] of Object.entries(SECTION_QUOTAS)) {
+                const pool = MASTER_QUESTION_BANK[section] || [];
+                const shuffled = [...pool].sort(() => 0.5 - Math.random());
+                const picked = shuffled.slice(0, count).map(q => ({ ...q, category: section }));
+                questions = questions.concat(picked);
+            }
+            return questions;
+        }
+
+        function startQuiz() {
+            playSound('click');
+            selectedQuestions = generateRandomQuestionSet();
+            currentQuestionIndex = 0;
+            userSubmissions = new Array(selectedQuestions.length).fill(null);
+            currentStreak = 0;
+            maxStreak = 0;
+            secondsElapsed = 0;
+
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            reviewScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
+            timerContainer.classList.remove('hidden');
+            streakBadge.classList.remove('hidden');
+            streakBadge.classList.add('flex');
+            streakCount.textContent = '0';
+
+            startTimer();
+            renderQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                timerText.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function renderQuestion() {
+            const q = selectedQuestions[currentQuestionIndex];
+
+            questionCounter.textContent = `Snippet ${currentQuestionIndex + 1} of ${selectedQuestions.length}`;
+            categoryBadge.textContent = q.category;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / selectedQuestions.length) * 100}%`;
+
+            userInput.value = '';
+            userInput.disabled = false;
+            userInput.focus();
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            hintBox.classList.add('hidden');
+            feedbackBox.classList.add('hidden');
+            nextContainer.classList.add('hidden');
+            nextContainer.classList.remove('flex');
+
+            codeDisplay.innerHTML = '';
+            q.codeLines.forEach((line) => {
+                const lineEl = document.createElement('div');
+                lineEl.className = 'flex items-start space-x-3 font-mono';
+                
+                const hasBlank = line.includes('???');
+                let formattedLine = escapeHtml(line);
+
+                if (hasBlank) {
+                    formattedLine = formattedLine.replace('???', `<span class="inline-block px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40 animate-pulse">???</span>`);
+                } else {
+                    formattedLine = highlightPythonSyntax(line);
+                }
+
+                lineEl.innerHTML = `
+                    <span class="text-slate-600 text-xs w-6 text-right select-none pt-0.5">#</span>
+                    <span class="flex-grow">${formattedLine}</span>
+                `;
+                codeDisplay.appendChild(lineEl);
+            });
+
+            expectedOutput.textContent = q.output;
+        }
+
+        function highlightPythonSyntax(line) {
+            let esc = escapeHtml(line);
+            return esc
+                .replace(/(print|len|float|int|abs|round|type|sum|bool)/g, '<span class="token-fn">$1</span>')
+                .replace(/(".*?"|'.*?')/g, '<span class="token-string">$1</span>')
+                .replace(/\b(\d+(\.\d+)?)\b/g, '<span class="token-number">$1</span>')
+                .replace(/(if|elif|else|for|in|while|break|continue|return|def|lambda|and|or|not|is|True|False)/g, '<span class="token-keyword">$1</span>');
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function normalizeString(str) {
+            return str.trim().replace(/\s+/g, ' ');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            if (userSubmissions[currentQuestionIndex] !== null) return;
+
+            const inputVal = userInput.value;
+            if (!inputVal.trim()) return;
+
+            const q = selectedQuestions[currentQuestionIndex];
+            const normalizedInput = normalizeString(inputVal);
+            
+            const isCorrect = q.validAnswers.some(ans => normalizeString(ans) === normalizedInput);
+
+            userSubmissions[currentQuestionIndex] = {
+                input: inputVal,
+                isCorrect: isCorrect
+            };
+
+            if (isCorrect) {
+                currentStreak++;
+                if (currentStreak > maxStreak) maxStreak = currentStreak;
+                playSound('correct');
+            } else {
+                currentStreak = 0;
+                playSound('incorrect');
+            }
+            streakCount.textContent = currentStreak;
+
+            userInput.disabled = true;
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            feedbackBox.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/40', 'text-emerald-300', 'bg-rose-500/10', 'border-rose-500/40', 'text-rose-300');
+            
+            if (isCorrect) {
+                feedbackBox.classList.add('bg-emerald-500/10', 'border-emerald-500/40', 'text-emerald-300');
+                feedbackBox.innerHTML = `
+                    <div class="flex items-center space-x-2 font-bold mb-1">
+                        <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+                        <span>Correct Execution!</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">${q.explanation}</p>
+                `;
+            } else {
+                feedbackBox.classList.add('bg-rose-500/10', 'border-rose-500/40', 'text-rose-300');
+                feedbackBox.innerHTML = `
+                    <div class="flex items-center space-x-2 font-bold mb-1">
+                        <i class="fa-solid fa-circle-xmark text-rose-400 text-base"></i>
+                        <span>Syntax Mismatch</span>
+                    </div>
+                    <p class="text-xs text-slate-300 mb-2">Expected answer: <code class="bg-slate-950 px-2 py-0.5 rounded text-emerald-400 font-mono">${escapeHtml(q.validAnswers[0])}</code></p>
+                    <p class="text-xs text-slate-300 leading-relaxed">${q.explanation}</p>
+                `;
+            }
+
+            nextContainer.classList.remove('hidden');
+            nextContainer.classList.add('flex');
+        }
+
+        function handleNextQuestion() {
+            playSound('click');
+            currentQuestionIndex++;
+            if (currentQuestionIndex < selectedQuestions.length) {
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            stopTimer();
+            quizScreen.classList.add('hidden');
+            quizScreen.classList.remove('flex');
+            showResultsDashboard();
+        }
+
+        function showResultsDashboard() {
+            reviewScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            let score = 0;
+            const sectionStats = {};
+
+            // Initialize section stats
+            Object.keys(SECTION_QUOTAS).forEach(sec => {
+                sectionStats[sec] = { correct: 0, total: SECTION_QUOTAS[sec] };
+            });
+
+            userSubmissions.forEach((sub, idx) => {
+                const q = selectedQuestions[idx];
+                if (sub && sub.isCorrect) {
+                    score++;
+                    if (sectionStats[q.category]) sectionStats[q.category].correct++;
+                }
+            });
+
+            const accuracy = Math.round((score / selectedQuestions.length) * 100);
+            const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            const secs = String(secondsElapsed % 60).padStart(2, '0');
+
+            document.getElementById('scoreText').textContent = `${score} / ${selectedQuestions.length}`;
+            document.getElementById('maxStreakText').textContent = maxStreak;
+            document.getElementById('timeTakenText').textContent = `${mins}:${secs}`;
+            document.getElementById('scoreBadge').textContent = `${accuracy}%`;
+
+            let proficiency = "Novice Developer";
+            if (accuracy >= 90) proficiency = "Python Architect";
+            else if (accuracy >= 75) proficiency = "Proficient Coder";
+            else if (accuracy >= 50) proficiency = "Intermediate";
+
+            document.getElementById('proficiencyText').textContent = proficiency;
+
+            // Render Section Breakdown
+            const breakdownContainer = document.getElementById('sectionBreakdownContainer');
+            breakdownContainer.innerHTML = '';
+
+            Object.entries(sectionStats).forEach(([section, stat]) => {
+                const pct = Math.round((stat.correct / stat.total) * 100);
+                const item = document.createElement('div');
+                item.className = 'bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center';
+                item.innerHTML = `
+                    <span class="text-slate-300 truncate">${section}</span>
+                    <span class="font-bold ${pct >= 70 ? 'text-emerald-400' : 'text-amber-400'}">${stat.correct} / ${stat.total} (${pct}%)</span>
+                `;
+                breakdownContainer.appendChild(item);
+            });
+        }
+
+        function showReviewScreen() {
+            playSound('click');
+            resultsScreen.classList.add('hidden');
+            reviewScreen.classList.remove('hidden');
+
+            const listContainer = document.getElementById('reviewQuestionsList');
+            listContainer.innerHTML = '';
+
+            selectedQuestions.forEach((q, idx) => {
+                const sub = userSubmissions[idx];
+                const isCorrect = sub && sub.isCorrect;
+
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-2xl border bg-slate-900 ${isCorrect ? 'border-emerald-500/40' : 'border-rose-500/40'}`;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isCorrect ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}">
+                            Snippet ${idx + 1} • ${isCorrect ? 'Correct' : 'Incorrect'}
+                        </span>
+                        <span class="text-xs text-slate-400">${q.category}</span>
+                    </div>
+
+                    <div class="p-3 bg-slate-950 rounded-xl font-mono text-xs text-slate-200 mb-3 space-y-1">
+                        ${q.codeLines.map(l => `<div>${escapeHtml(l)}</div>`).join('')}
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono mb-3">
+                        <div class="p-2 rounded border ${isCorrect ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300'}">
+                            <span class="text-slate-500 block text-[10px]">Your Input</span>
+                            ${sub ? escapeHtml(sub.input) : 'None'}
+                        </div>
+                        <div class="p-2 rounded border bg-slate-950 border-slate-800 text-emerald-400">
+                            <span class="text-slate-500 block text-[10px]">Valid Answer(s)</span>
+                            ${q.validAnswers.map(a => escapeHtml(a)).join(' OR ')}
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-400 leading-relaxed bg-slate-950/50 p-3 rounded-lg border border-slate-800">
+                        <span class="font-semibold text-slate-300">Explanation:</span> ${q.explanation}
+                    </p>
+                `;
+
+                listContainer.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

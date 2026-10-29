@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Assessment Benchmark - Pandas & NumPy</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        python: {
+                            blue: '#306998',
+                            yellow: '#FFE873',
+                            dark: '#1e293b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        code, pre {
+            font-family: 'Fira Code', monospace;
+        }
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-sky-500 to-amber-400 p-2 rounded-xl text-slate-950 font-bold text-lg shadow-lg shadow-sky-500/20">
+                    <i class="fa-brands fa-python text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide text-white">Python Data Science Benchmark</h1>
+                    <p class="text-xs text-slate-400">Pandas & NumPy Competency Assessment</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button id="soundToggle" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Toggle Sound Effects">
+                    <i class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+                <div id="timerContainer" class="hidden flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-sky-400 text-sm"></i>
+                    <span id="timerText" class="font-mono text-sm font-semibold text-slate-200">00:00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow flex flex-col justify-center">
+
+        <!-- START SCREEN -->
+        <div id="startScreen" class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 sm:p-10 shadow-2xl backdrop-blur">
+            <div class="text-center max-w-2xl mx-auto">
+                <div class="inline-flex items-center space-x-2 bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold px-3 py-1 rounded-full mb-6">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>20 Questions • ~15 Minutes</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4 tracking-tight">Test Your Pandas & NumPy Expertise</h2>
+                <p class="text-slate-300 mb-8 leading-relaxed text-sm sm:text-base">
+                    Benchmark your understanding of core Python Data Science libraries. Concepts cover 1D/2D arrays, indexing & slicing, vectorization, DataFrame operations, grouping, missing data handling, and merging.
+                </p>
+
+                <!-- Topics Overview Badge List -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-left">
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 flex flex-col items-center text-center">
+                        <i class="fa-solid fa-table-cells text-sky-400 text-lg mb-1"></i>
+                        <span class="text-xs font-semibold text-slate-200">DataFrames & Series</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 flex flex-col items-center text-center">
+                        <i class="fa-solid fa-cube text-amber-400 text-lg mb-1"></i>
+                        <span class="text-xs font-semibold text-slate-200">NumPy Arrays & Math</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 flex flex-col items-center text-center">
+                        <i class="fa-solid fa-filter text-emerald-400 text-lg mb-1"></i>
+                        <span class="text-xs font-semibold text-slate-200">Filtering & Indexing</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 flex flex-col items-center text-center">
+                        <i class="fa-solid fa-layer-group text-purple-400 text-lg mb-1"></i>
+                        <span class="text-xs font-semibold text-slate-200">Groupby & Aggregation</span>
+                    </div>
+                </div>
+
+                <button id="startBtn" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-sky-500/25 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                    Start Assessment Benchmark <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- QUIZ SCREEN -->
+        <div id="quizScreen" class="hidden flex-col space-y-6">
+            
+            <!-- Progress Bar & Question Counter -->
+            <div class="bg-slate-800/40 border border-slate-700/50 p-4 rounded-xl">
+                <div class="flex justify-between items-center text-xs font-semibold text-slate-400 mb-2">
+                    <span id="questionCounter">Question 1 of 20</span>
+                    <span id="categoryBadge" class="bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2.5 py-0.5 rounded-full uppercase tracking-wider text-[10px]">Pandas Basics</span>
+                </div>
+                <div class="w-full bg-slate-700/50 h-2 rounded-full overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-sky-500 to-amber-400 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 sm:p-8 shadow-xl relative backdrop-blur">
+                <!-- Question Text -->
+                <h3 id="questionText" class="text-lg sm:text-xl font-semibold text-slate-100 mb-4 leading-snug">
+                    Question text will appear here...
+                </h3>
+
+                <!-- Optional Code Snippet Container -->
+                <div id="codeSnippetContainer" class="hidden mb-6 rounded-xl overflow-hidden border border-slate-700/80">
+                    <div class="bg-slate-900/80 px-4 py-1.5 text-xs font-mono text-slate-400 border-b border-slate-700/60 flex items-center justify-between">
+                        <span>Python Code</span>
+                        <i class="fa-solid fa-code text-slate-500"></i>
+                    </div>
+                    <pre class="p-4 code-block overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed"><code id="codeSnippet"></code></pre>
+                </div>
+
+                <!-- Multiple Choice Options -->
+                <div id="optionsContainer" class="space-y-3">
+                    <!-- Dynamic Options Inserted Here -->
+                </div>
+
+                <!-- Instant Feedback Banner -->
+                <div id="feedbackBanner" class="hidden mt-6 p-4 rounded-xl border flex items-start space-x-3 transition-all duration-300">
+                    <div id="feedbackIcon" class="mt-0.5 text-lg"></div>
+                    <div>
+                        <h4 id="feedbackTitle" class="font-bold text-sm mb-1"></h4>
+                        <p id="explanationText" class="text-xs sm:text-sm text-slate-300 leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <!-- Next Button Container -->
+                <div class="mt-6 flex justify-end">
+                    <button id="nextBtn" class="hidden px-6 py-3 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-sky-500/20 items-center space-x-2 text-sm">
+                        <span>Next Question</span>
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="resultsScreen" class="hidden bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 sm:p-10 shadow-2xl backdrop-blur">
+            <div class="text-center mb-8">
+                <div id="scoreBadge" class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-900 border-4 border-sky-500 mb-4 text-2xl font-extrabold text-white">
+                    0%
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Assessment Completed!</h2>
+                <p id="resultMessage" class="text-slate-400 text-sm mt-1">Here is a detailed summary of your score and proficiency level.</p>
+            </div>
+
+            <!-- Key Metrics Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                <div class="bg-slate-900/60 border border-slate-700/50 p-4 rounded-xl text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Final Score</p>
+                    <p id="scoreText" class="text-2xl font-bold text-sky-400">0 / 20</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-700/50 p-4 rounded-xl text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Accuracy</p>
+                    <p id="accuracyText" class="text-2xl font-bold text-amber-400">0%</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-700/50 p-4 rounded-xl text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Time Elapsed</p>
+                    <p id="timeTakenText" class="text-2xl font-bold text-emerald-400">00:00</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-700/50 p-4 rounded-xl text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Proficiency Level</p>
+                    <p id="proficiencyText" class="text-lg font-bold text-purple-400 truncate">Novice</p>
+                </div>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div class="mb-8 bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                <h3 class="text-sm font-bold text-slate-200 mb-4 uppercase tracking-wider flex items-center">
+                    <i class="fa-solid fa-chart-pie text-sky-400 mr-2"></i> Category Breakdown
+                </h3>
+                <div id="categoryBreakdown" class="space-y-3">
+                    <!-- Dynamic Breakdown Items -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button id="reviewBtn" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl transition flex items-center justify-center space-x-2 text-sm">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Review Answer Key</span>
+                </button>
+                <button id="restartBtn" class="px-6 py-3 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-sky-500/20 flex items-center justify-center space-x-2 text-sm">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Retake Assessment</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- REVIEW SCREEN -->
+        <div id="reviewScreen" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-slate-800/80 p-4 rounded-xl border border-slate-700/80">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Answer Key & Review</h2>
+                    <p class="text-xs text-slate-400">Review all 20 questions and correct answers</p>
+                </div>
+                <button id="backToResultsBtn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-lg text-slate-200 transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard
+                </button>
+            </div>
+
+            <div id="reviewQuestionsList" class="space-y-4">
+                <!-- Dynamic Review Cards -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
+        <p>Python Data Science Competency Benchmark • Based on Pandas & NumPy Essentials</p>
+    </footer>
+
+    <!-- App Logic -->
+    <script>
+        // 20 Questions Dataset derived from Introductory Data Science Concepts (Pandas & NumPy)
+        const quizQuestions = [
+            {
+                id: 1,
+                category: "Pandas Basics",
+                question: "Which of the following functions is typically used to import tabular data from a CSV file into a pandas DataFrame?",
+                code: `import pandas as pd\n# Which function reads 'data.csv'?\ndf = pd.???('data.csv')`,
+                options: [
+                    "pd.import_csv('data.csv')",
+                    "pd.read_csv('data.csv')",
+                    "pd.load_csv('data.csv')",
+                    "pd.DataFrame.from_csv('data.csv')"
+                ],
+                correct: 1,
+                explanation: "`pd.read_csv()` is the primary pandas function for reading comma-separated value files into a DataFrame."
+            },
+            {
+                id: 2,
+                category: "NumPy Basics",
+                question: "What is the primary multi-dimensional array object provided by the NumPy library?",
+                code: `import numpy as np\narr = np.array([1, 2, 3])\nprint(type(arr))`,
+                options: [
+                    "pd.Series",
+                    "np.ndarray",
+                    "np.matrix_list",
+                    "np.data_vector"
+                ],
+                correct: 1,
+                explanation: "NumPy's core data structure is `ndarray` (N-dimensional array), which offers memory-efficient contiguous storage and vectorized mathematical computations."
+            },
+            {
+                id: 3,
+                category: "Pandas Indexing",
+                question: "What is the main difference between .loc[] and .iloc[] in pandas?",
+                code: `# df is a DataFrame with custom string row labels\ndf.loc['a']\ndf.iloc[0]`,
+                options: [
+                    ".loc[] uses integer-position indexing, whereas .iloc[] uses label-based indexing.",
+                    ".loc[] is strictly for column selection, whereas .iloc[] is for row selection.",
+                    ".loc[] is label-based indexing, whereas .iloc[] is integer position-based indexing.",
+                    ".loc[] returns a Series, whereas .iloc[] always returns a DataFrame."
+                ],
+                correct: 2,
+                explanation: "`.loc[]` selects data using row/column labels or boolean arrays, while `.iloc[]` uses 0-indexed integer positions regardless of index labels."
+            },
+            {
+                id: 4,
+                category: "NumPy Vectorization",
+                question: "How does NumPy evaluate the operation `arr + 5` when `arr = np.array([1, 2, 3])`?",
+                code: `import numpy as np\narr = np.array([1, 2, 3])\nresult = arr + 5`,
+                options: [
+                    "It raises a TypeError because you cannot add a scalar to an array directly.",
+                    "It appends 5 to the end of the array, returning `[1, 2, 3, 5]`.",
+                    "It performs element-wise addition (broadcasting 5 to each element), returning `[6, 7, 8]`.",
+                    "It creates a 2D array of shape (1, 3)."
+                ],
+                correct: 2,
+                explanation: "NumPy uses element-wise operations and broadcasting to apply scalar values across all elements in an array without writing explicit Python for-loops."
+            },
+            {
+                id: 5,
+                category: "Data Cleaning",
+                question: "Which method in pandas is used to drop rows containing missing values (NaN)?",
+                code: `import pandas as pd\nimport numpy as np\ndf = pd.DataFrame({'A': [1, np.nan, 3], 'B': [4, 5, np.nan]})\nclean_df = df.???()`,
+                options: [
+                    "df.remove_null()",
+                    "df.dropna()",
+                    "df.fillna()",
+                    "df.clean_na()"
+                ],
+                correct: 1,
+                explanation: "`df.dropna()` returns a new DataFrame with missing values (NaN) removed. `df.fillna()` replaces missing values instead."
+            },
+            {
+                id: 6,
+                category: "Pandas Filtering",
+                question: "How do you filter a DataFrame `df` to keep rows where column 'age' is greater than 25?",
+                code: `import pandas as pd\ndf = pd.DataFrame({'name': ['Alice', 'Bob', 'Charlie'], 'age': [22, 28, 35]})\n# Select rows where age > 25`,
+                options: [
+                    "df.where('age > 25')",
+                    "df[df['age'] > 25]",
+                    "df.filter(df['age'] > 25)",
+                    "df.select(df['age'] > 25)"
+                ],
+                correct: 1,
+                explanation: "Boolean indexing in pandas uses conditional statements inside brackets, e.g., `df[df['age'] > 25]`."
+            },
+            {
+                id: 7,
+                category: "NumPy Slicing",
+                question: "Given a 2D NumPy array `arr` of shape (4, 4), what does `arr[:2, 1:3]` extract?",
+                code: `import numpy as np\narr = np.arange(16).reshape(4, 4)\nsub = arr[:2, 1:3]`,
+                options: [
+                    "Rows 0 and 1, columns 1 and 2.",
+                    "Rows 0, 1, and 2, columns 1, 2, and 3.",
+                    "Rows 1 and 2, columns 0 and 1.",
+                    "All elements from row 2 and column 3."
+                ],
+                correct: 0,
+                explanation: "Slice ranges in Python are non-inclusive of the upper bound. `[:2]` selects rows 0 and 1; `[1:3]` selects columns 1 and 2."
+            },
+            {
+                id: 8,
+                category: "Groupby & Aggregation",
+                question: "Which code computes the average salary for each department in a DataFrame?",
+                code: `# df columns: ['Department', 'Salary']`,
+                options: [
+                    "df.groupby('Department')['Salary'].mean()",
+                    "df.aggregate('Department', 'Salary', np.mean)",
+                    "df['Salary'].groupby('Department').average()",
+                    "df.mean().groupby('Department')"
+                ],
+                correct: 0,
+                explanation: "`df.groupby('Department')['Salary'].mean()` groups data by the 'Department' column and calculates the mean of 'Salary' for each group."
+            },
+            {
+                id: 9,
+                category: "Pandas Structure",
+                question: "What pandas attribute returns a tuple representing the shape (rows, columns) of a DataFrame?",
+                code: `df = pd.DataFrame({'a': [1, 2], 'b': [3, 4], 'c': [5, 6]})\nprint(df.shape)`,
+                options: [
+                    "df.size()",
+                    "df.dimension",
+                    "df.shape",
+                    "df.len()"
+                ],
+                correct: 2,
+                explanation: "`df.shape` is an attribute (not a function) that returns a tuple representing the dimensionality `(number_of_rows, number_of_columns)`."
+            },
+            {
+                id: 10,
+                category: "Data Cleaning",
+                question: "How do you replace missing values (NaN) in a column 'score' with 0?",
+                code: `df['score'] = df['score'].???(0)`,
+                options: [
+                    "df['score'].replace_na(0)",
+                    "df['score'].fillna(0)",
+                    "df['score'].set_null(0)",
+                    "df['score'].zero_na()"
+                ],
+                correct: 1,
+                explanation: "`fillna()` replaces missing values with a specified scalar value or method-derived value (like mean or forward-fill)."
+            },
+            {
+                id: 11,
+                category: "NumPy Aggregation",
+                question: "To compute the sum of each column across rows in a 2D NumPy array `arr`, which axis should be used?",
+                code: `import numpy as np\narr = np.array([[1, 2], [3, 4]])\n# Sum along columns\ncol_sums = arr.sum(axis=???)`,
+                options: [
+                    "axis=0",
+                    "axis=1",
+                    "axis=-1",
+                    "axis=2"
+                ],
+                correct: 0,
+                explanation: "In 2D NumPy arrays, `axis=0` operates along rows (down columns), collapsing rows to compute per-column summaries."
+            },
+            {
+                id: 12,
+                category: "Merging & Joining",
+                question: "Which pandas function combines two DataFrames along columns or rows based on common key values, similar to an SQL JOIN?",
+                code: `df_merged = pd.???(df1, df2, on='user_id', how='inner')`,
+                options: [
+                    "pd.concat()",
+                    "pd.append()",
+                    "pd.merge()",
+                    "pd.combine()"
+                ],
+                correct: 2,
+                explanation: "`pd.merge()` provides database-style joining operations on key columns (e.g. inner, left, right, outer joins)."
+            },
+            {
+                id: 13,
+                category: "Pandas Methods",
+                question: "Which method provides quick summary statistics (mean, std, min, max, quantiles) for numeric columns in a DataFrame?",
+                code: `df = pd.read_csv('sales.csv')\ndf.???()`,
+                options: [
+                    "df.info()",
+                    "df.describe()",
+                    "df.summary()",
+                    "df.stats()"
+                ],
+                correct: 1,
+                explanation: "`df.describe()` calculates descriptive statistics summarizing central tendency, dispersion, and shape of a dataset's distribution."
+            },
+            {
+                id: 14,
+                category: "NumPy Logic",
+                question: "What is the result of applying boolean mask `arr[arr > 3]` on `arr = np.array([1, 4, 2, 5])`?",
+                code: `import numpy as np\narr = np.array([1, 4, 2, 5])\nfiltered = arr[arr > 3]`,
+                options: [
+                    "np.array([False, True, False, True])",
+                    "np.array([4, 5])",
+                    "np.array([1, 2])",
+                    "np.array([1, 4, 2, 5])"
+                ],
+                correct: 1,
+                explanation: "Indexing an array with a boolean mask returns a 1D array containing only the elements where the condition evaluates to `True`."
+            },
+            {
+                id: 15,
+                category: "Pandas Series",
+                question: "What is the key difference between a pandas Series and a 1D NumPy array?",
+                code: `import pandas as pd\ns = pd.Series([10, 20, 30], index=['a', 'b', 'c'])`,
+                options: [
+                    "A Series can only hold numeric values.",
+                    "A Series includes explicit index labels for each element.",
+                    "A NumPy array supports indexing by string keys.",
+                    "There is no difference; they are exact aliases."
+                ],
+                correct: 1,
+                explanation: "A pandas Series is built on top of a 1D NumPy array but adds custom, explicit indexing capabilities (e.g. string labels)."
+            },
+            {
+                id: 16,
+                category: "Pandas Operations",
+                question: "How do you apply a custom function `fn` to every element in a pandas Series?",
+                code: `s = pd.Series([1, 2, 3])\nresult = s.???(lambda x: x ** 2)`,
+                options: [
+                    "s.map() or s.apply()",
+                    "s.transform_all()",
+                    "s.vectorize()",
+                    "s.applymap_series()"
+                ],
+                correct: 0,
+                explanation: "`apply()` and `map()` are standard methods for applying functions or mappings to values across a pandas Series."
+            },
+            {
+                id: 17,
+                category: "Pandas Methods",
+                question: "Which method returns the number of non-null, data types, and memory usage for a DataFrame?",
+                code: `df.???()`,
+                options: [
+                    "df.describe()",
+                    "df.shape",
+                    "df.info()",
+                    "df.dtypes_summary()"
+                ],
+                correct: 2,
+                explanation: "`df.info()` prints a concise summary of a DataFrame including column names, counts of non-null values, and dtypes."
+            },
+            {
+                id: 18,
+                category: "Merging & Joining",
+                question: "Which pandas function is primarily used to stack or concatenate DataFrames vertically along rows or horizontally along columns?",
+                code: `# Combining df1 and df2 along axis 0\nresult = pd.???([df1, df2], axis=0)`,
+                options: [
+                    "pd.concat()",
+                    "pd.merge()",
+                    "pd.join()",
+                    "pd.stack_all()"
+                ],
+                correct: 0,
+                explanation: "`pd.concat()` concatenates or stacks pandas objects along a specified axis."
+            },
+            {
+                id: 19,
+                category: "Pandas Operations",
+                question: "How do you sort a DataFrame `df` by a specific column named `'price'` in descending order?",
+                code: `df.sort_values(by='price', ???)`,
+                options: [
+                    "ascending=False",
+                    "reverse=True",
+                    "order='descending'",
+                    "sort=False"
+                ],
+                correct: 0,
+                explanation: "`df.sort_values(by='price', ascending=False)` sorts values in descending order."
+            },
+            {
+                id: 20,
+                category: "Data Cleaning",
+                question: "How do you drop duplicate rows from a pandas DataFrame?",
+                code: `clean_df = df.???()`,
+                options: [
+                    "df.unique()",
+                    "df.drop_duplicates()",
+                    "df.remove_repeated()",
+                    "df.deduplicate()"
+                ],
+                correct: 1,
+                explanation: "`df.drop_duplicates()` identifies and removes duplicate rows from a DataFrame."
+            }
+        ];
+
+        // State variables
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(quizQuestions.length).fill(null);
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let soundEnabled = true;
+
+        // Audio Context Synthesizer (No external files)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'incorrect') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(174.61, now + 0.12); // F3
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                }
+            } catch (e) {
+                console.log("Audio not allowed yet");
+            }
+        }
+
+        // DOM Element Refs
+        const startScreen = document.getElementById('startScreen');
+        const quizScreen = document.getElementById('quizScreen');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const reviewScreen = document.getElementById('reviewScreen');
+
+        const startBtn = document.getElementById('startBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const reviewBtn = document.getElementById('reviewBtn');
+        const backToResultsBtn = document.getElementById('backToResultsBtn');
+        const soundToggle = document.getElementById('soundToggle');
+
+        const timerContainer = document.getElementById('timerContainer');
+        const timerText = document.getElementById('timerText');
+
+        const questionCounter = document.getElementById('questionCounter');
+        const categoryBadge = document.getElementById('categoryBadge');
+        const progressBar = document.getElementById('progressBar');
+        const questionText = document.getElementById('questionText');
+        const codeSnippetContainer = document.getElementById('codeSnippetContainer');
+        const codeSnippet = document.getElementById('codeSnippet');
+        const optionsContainer = document.getElementById('optionsContainer');
+
+        const feedbackBanner = document.getElementById('feedbackBanner');
+        const feedbackIcon = document.getElementById('feedbackIcon');
+        const feedbackTitle = document.getElementById('feedbackTitle');
+        const explanationText = document.getElementById('explanationText');
+
+        // Init Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', handleNextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+        reviewBtn.addEventListener('click', showReviewScreen);
+        backToResultsBtn.addEventListener('click', showResultsDashboard);
+
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.innerHTML = soundEnabled 
+                ? '<i class="fa-solid fa-volume-high text-sm"></i>' 
+                : '<i class="fa-solid fa-volume-xmark text-sm text-slate-500"></i>';
+        });
+
+        // Functions
+        function startQuiz() {
+            playSound('click');
+            currentQuestionIndex = 0;
+            userAnswers = new Array(quizQuestions.length).fill(null);
+            secondsElapsed = 0;
+
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            reviewScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
+            timerContainer.classList.remove('hidden');
+
+            startTimer();
+            renderQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                timerText.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function renderQuestion() {
+            const q = quizQuestions[currentQuestionIndex];
+
+            // Progress Header
+            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
+            categoryBadge.textContent = q.category;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`;
+
+            // Question content
+            questionText.textContent = q.question;
+
+            if (q.code) {
+                codeSnippetContainer.classList.remove('hidden');
+                codeSnippet.textContent = q.code;
+            } else {
+                codeSnippetContainer.classList.add('hidden');
+            }
+
+            // Options
+            optionsContainer.innerHTML = '';
+            feedbackBanner.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+
+            q.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 rounded-xl border border-slate-700 bg-slate-900/60 hover:bg-slate-700/50 hover:border-slate-500 transition duration-150 flex items-center space-x-3 text-sm text-slate-200 group`;
+                btn.innerHTML = `
+                    <span class="w-7 h-7 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center font-mono font-semibold text-xs text-slate-300 group-hover:bg-sky-500 group-hover:border-sky-400 group-hover:text-slate-950 transition">
+                        ${String.fromCharCode(65 + idx)}
+                    </span>
+                    <span class="flex-grow font-mono leading-snug">${escapeHtml(optText)}</span>
+                `;
+                btn.addEventListener('click', () => handleOptionSelect(idx));
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;")
+                       .replace(/</g, "&lt;")
+                       .replace(/>/g, "&gt;");
+        }
+
+        function handleOptionSelect(optionIdx) {
+            if (userAnswers[currentQuestionIndex] !== null) return; // Prevent changing answer once selected
+
+            userAnswers[currentQuestionIndex] = optionIdx;
+            const q = quizQuestions[currentQuestionIndex];
+            const isCorrect = optionIdx === q.correct;
+
+            playSound(isCorrect ? 'correct' : 'incorrect');
+
+            // Style options
+            const buttons = optionsContainer.children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                buttons[i].classList.remove('hover:bg-slate-700/50', 'hover:border-slate-500');
+
+                if (i === q.correct) {
+                    buttons[i].classList.add('bg-emerald-500/20', 'border-emerald-500', 'text-emerald-200');
+                } else if (i === optionIdx && !isCorrect) {
+                    buttons[i].classList.add('bg-rose-500/20', 'border-rose-500', 'text-rose-200');
+                } else {
+                    buttons[i].classList.add('opacity-50');
+                }
+            }
+
+            // Feedback Banner
+            feedbackBanner.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/40', 'bg-rose-500/10', 'border-rose-500/40');
+            if (isCorrect) {
+                feedbackBanner.classList.add('bg-emerald-500/10', 'border-emerald-500/40');
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i>`;
+                feedbackTitle.textContent = "Correct!";
+                feedbackTitle.className = "font-bold text-sm mb-1 text-emerald-400";
+            } else {
+                feedbackBanner.classList.add('bg-rose-500/10', 'border-rose-500/40');
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400"></i>`;
+                feedbackTitle.textContent = "Incorrect";
+                feedbackTitle.className = "font-bold text-sm mb-1 text-rose-400";
+            }
+            explanationText.textContent = q.explanation;
+
+            // Show Next
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('flex');
+        }
+
+        function handleNextQuestion() {
+            playSound('click');
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizQuestions.length) {
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            stopTimer();
+            quizScreen.classList.add('hidden');
+            quizScreen.classList.remove('flex');
+            showResultsDashboard();
+        }
+
+        function showResultsDashboard() {
+            reviewScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            let score = 0;
+            const categoryStats = {};
+
+            quizQuestions.forEach((q, idx) => {
+                if (!categoryStats[q.category]) {
+                    categoryStats[q.category] = { correct: 0, total: 0 };
+                }
+                categoryStats[q.category].total++;
+
+                if (userAnswers[idx] === q.correct) {
+                    score++;
+                    categoryStats[q.category].correct++;
+                }
+            });
+
+            const accuracy = Math.round((score / quizQuestions.length) * 100);
+            
+            // Format Time
+            const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            const secs = String(secondsElapsed % 60).padStart(2, '0');
+
+            // Set Metrics
+            document.getElementById('scoreText').textContent = `${score} / ${quizQuestions.length}`;
+            document.getElementById('accuracyText').textContent = `${accuracy}%`;
+            document.getElementById('timeTakenText').textContent = `${mins}:${secs}`;
+            document.getElementById('scoreBadge').textContent = `${accuracy}%`;
+
+            let proficiency = "Beginner";
+            if (accuracy >= 90) proficiency = "Master Data Analyst";
+            else if (accuracy >= 75) proficiency = "Proficient";
+            else if (accuracy >= 55) proficiency = "Intermediate";
+
+            document.getElementById('proficiencyText').textContent = proficiency;
+
+            // Render Category Breakdown
+            const breakdownContainer = document.getElementById('categoryBreakdown');
+            breakdownContainer.innerHTML = '';
+
+            Object.keys(categoryStats).forEach(cat => {
+                const stat = categoryStats[cat];
+                const pct = Math.round((stat.correct / stat.total) * 100);
+                
+                const item = document.createElement('div');
+                item.className = "space-y-1";
+                item.innerHTML = `
+                    <div class="flex justify-between text-xs font-semibold text-slate-300">
+                        <span>${cat}</span>
+                        <span>${stat.correct}/${stat.total} (${pct}%)</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700/50">
+                        <div class="bg-sky-500 h-full rounded-full" style="width: ${pct}%"></div>
+                    </div>
+                `;
+                breakdownContainer.appendChild(item);
+            });
+        }
+
+        function showReviewScreen() {
+            playSound('click');
+            resultsScreen.classList.add('hidden');
+            reviewScreen.classList.remove('hidden');
+
+            const listContainer = document.getElementById('reviewQuestionsList');
+            listContainer.innerHTML = '';
+
+            quizQuestions.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                const isCorrect = userAns === q.correct;
+
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-2xl border ${isCorrect ? 'border-emerald-500/40 bg-slate-800/80' : 'border-rose-500/40 bg-slate-800/80'}`;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isCorrect ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}">
+                            Question ${idx + 1} • ${isCorrect ? 'Correct' : 'Incorrect'}
+                        </span>
+                        <span class="text-xs text-slate-400">${q.category}</span>
+                    </div>
+                    <h4 class="text-sm sm:text-base font-semibold text-slate-100 mb-3">${q.question}</h4>
+                    
+                    ${q.code ? `<pre class="p-3 bg-slate-900 text-slate-200 text-xs rounded-lg font-mono mb-3 overflow-x-auto border border-slate-700/50"><code>${escapeHtml(q.code)}</code></pre>` : ''}
+
+                    <div class="space-y-2 mb-3 text-xs sm:text-sm">
+                        <div class="p-2.5 rounded-lg border ${userAns === q.correct ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' : 'bg-rose-500/20 border-rose-500/50 text-rose-200'}">
+                            <span class="font-bold">Your Answer:</span> ${userAns !== null ? escapeHtml(q.options[userAns]) : 'Skipped'}
+                        </div>
+                        ${!isCorrect ? `
+                            <div class="p-2.5 rounded-lg border bg-emerald-500/10 border-emerald-500/30 text-emerald-300">
+                                <span class="font-bold">Correct Answer:</span> ${escapeHtml(q.options[q.correct])}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <p class="text-xs text-slate-400 leading-relaxed bg-slate-900/60 p-3 rounded-lg border border-slate-700/40">
+                        <span class="font-semibold text-slate-300">Explanation:</span> ${q.explanation}
+                    </p>
+                `;
+
+                listContainer.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

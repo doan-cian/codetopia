@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Mastery Assessment (Beginner to Advanced)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-cyan-500 selection:text-black">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-cyan-500 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-sm tracking-wider">PY-20</div>
+                <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Python Progression Assessment</h1>
+            </div>
+            <div id="timer-display" class="hidden items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700 text-cyan-400 font-mono text-sm">
+                <svg class="w-4 h-4 animate-spin text-cyan-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                <span id="time-left">10:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl w-full mx-auto px-4 py-8 flex-grow flex flex-col justify-center">
+
+        <!-- Welcome View -->
+        <div id="view-welcome" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <span class="text-xs uppercase tracking-widest text-cyan-400 font-semibold bg-cyan-950/80 border border-cyan-800/50 px-3 py-1 rounded-full inline-block mb-4">Timed 20-Question Challenge</span>
+                <h2 class="text-3xl font-extrabold text-white mb-4 tracking-tight">Test Your Python Skills</h2>
+                <p class="text-slate-300 text-base leading-relaxed mb-6">
+                    Welcome to the 20-question progressive Python assessment spanning categories 2 through 9. Each question features code with a missing blank (<code>___</code>) and its expected output. 
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-sm text-slate-400 bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+                    <div class="flex items-start space-x-3">
+                        <div class="text-cyan-400 font-bold mt-0.5">•</div>
+                        <div><strong class="text-slate-200">Progressive Difficulty:</strong> Starts beginner-friendly and grows challenging.</div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="text-cyan-400 font-bold mt-0.5">•</div>
+                        <div><strong class="text-slate-200">Scoring:</strong> 5 points per question (100 max), scaled and classified post-test.</div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="text-cyan-400 font-bold mt-0.5">•</div>
+                        <div><strong class="text-slate-200">Continuous Flow:</strong> Answers are collected without immediate feedback until completion.</div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="text-cyan-400 font-bold mt-0.5">•</div>
+                        <div><strong class="text-slate-200">Comprehensive Feedback:</strong> Detailed explanations and targeted category improvement advice afterward.</div>
+                    </div>
+                </div>
+
+                <button onclick="startAssessment()" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-cyan-500/20 text-center tracking-wide cursor-pointer">
+                    Start Assessment Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz View -->
+        <div id="view-quiz" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+                <div>
+                    <span id="question-category" class="text-xs font-semibold uppercase tracking-wider text-cyan-400 bg-cyan-950/80 px-2.5 py-1 rounded-md border border-cyan-800/40">Category</span>
+                    <span id="question-level" class="ml-2 text-xs font-semibold uppercase tracking-wider text-slate-400 bg-slate-800 px-2.5 py-1 rounded-md">Difficulty</span>
+                </div>
+                <div class="text-slate-400 text-sm font-mono">
+                    Question <span id="current-q-num" class="text-cyan-400 font-bold">1</span> of 20
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <p id="question-prompt" class="text-slate-200 text-base mb-4 font-medium"></p>
+                
+                <!-- Code Box -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-sm overflow-x-auto shadow-inner">
+                    <pre id="code-snippet" class="text-cyan-200 leading-relaxed"></pre>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 mb-6">
+                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Expected Output</div>
+                <pre id="expected-output" class="text-emerald-400 font-mono text-sm bg-slate-900 p-2 rounded border border-slate-800"></pre>
+            </div>
+
+            <!-- Input Form -->
+            <form onsubmit="submitAnswer(event)" class="space-y-4">
+                <div>
+                    <label for="user-answer" class="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Fill in the blank:</label>
+                    <input type="text" id="user-answer" autocomplete="off" placeholder="Type your answer here..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition">
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition shadow-md cursor-pointer">
+                    Submit Answer & Continue
+                </button>
+            </form>
+        </div>
+
+        <!-- Results View -->
+        <div id="view-results" class="hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl text-center">
+                <div class="inline-block p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl mb-4 text-cyan-400">
+                    <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Assessment Complete!</h2>
+                <p class="text-slate-400 text-sm mb-6">Here is your comprehensive performance breakdown and targeted improvement roadmap.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto mb-8">
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+                        <div class="text-xs uppercase tracking-wider text-slate-400 mb-1">Final Score</div>
+                        <div id="res-score" class="text-3xl font-extrabold text-cyan-400 font-mono">0 / 100</div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+                        <div class="text-xs uppercase tracking-wider text-slate-400 mb-1">Raw Correct</div>
+                        <div id="res-raw" class="text-3xl font-extrabold text-emerald-400 font-mono">0 / 20</div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+                        <div class="text-xs uppercase tracking-wider text-slate-400 mb-1">Skill Level</div>
+                        <div id="res-level" class="text-xl font-bold text-amber-400 mt-1 uppercase tracking-wider">Beginner</div>
+                    </div>
+                </div>
+
+                <!-- Improvement Advice Box -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 text-left mb-6">
+                    <h3 class="text-base font-bold text-white mb-3 flex items-center">
+                        <svg class="w-5 h-5 text-cyan-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Targeted Category Focus & Improvement Advice
+                    </h3>
+                    <div id="res-advice" class="text-slate-300 text-sm space-y-3 leading-relaxed"></div>
+                </div>
+
+                <button onclick="location.reload()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition border border-slate-700 cursor-pointer text-sm">
+                    Retake Assessment
+                </button>
+            </div>
+
+            <!-- Detailed Question Review -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+                <h3 class="text-xl font-bold text-white mb-6">Detailed Question Review & Explanations</h3>
+                <div id="review-list" class="space-y-6"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900/50 py-4 text-center text-xs text-slate-500">
+        Python Assessment Game &bull; Categories 2 to 9
+    </footer>
+
+    <script>
+        const categories = {
+            2: "Variables and Basic Data Types",
+            3: "Conditional Statements (if/elif/else)",
+            4: "Loops (for and while)",
+            5: "Functions and Scope",
+            6: "Data Structures (Lists, Tuples, Sets)",
+            7: "Dictionaries and Hash Maps",
+            8: "File Handling and I/O",
+            9: "Error Handling and Exceptions"
+        };
+
+        const questions = [
+            // Cat 2
+            {
+                id: 1, category: 2, level: "Beginner",
+                prompt: "Assign an integer value to a variable and print its data type.",
+                code: "x = 42\nprint(type(x))",
+                expected: "<class 'int'>",
+                blankAnswer: "x = 42",
+                explanation: "In Python, integers without decimal points are automatically classified under the `int` class when inspected with `type()`."
+            },
+            {
+                id: 2, category: 2, level: "Beginner",
+                prompt: "Perform float division and print the resulting floating-point number.",
+                code: "result = 7 ___ 2\nprint(result)",
+                expected: "3.5",
+                blankAnswer: "/",
+                explanation: "The `/` operator performs standard float division in Python, always returning a float even if numbers divide evenly."
+            },
+            // Cat 3
+            {
+                id: 3, category: 3, level: "Beginner",
+                prompt: "Use an `if` condition to check if a number is strictly greater than 10.",
+                code: "num = 15\n___ num > 10:\n    print('Large')",
+                expected: "Large",
+                blankAnswer: "if",
+                explanation: "Conditional branching in Python begins with the `if` keyword followed by a boolean expression and a colon `:`."
+            },
+            {
+                id: 4, category: 3, level: "Intermediate",
+                prompt: "Add an alternative branch using `elif` when checking score thresholds.",
+                code: "score = 75\nif score >= 90:\n    print('A')\n___ score >= 70:\n    print('C')\nelse:\n    print('F')",
+                expected: "C",
+                blankAnswer: "elif",
+                explanation: "`elif` (short for else if) allows checking multiple sequential conditional expressions if previous `if` or `elif` checks evaluate to False."
+            },
+            // Cat 4
+            {
+                id: 5, category: 4, level: "Beginner",
+                prompt: "Iterate over a sequence of numbers using a `for` loop.",
+                code: "total = 0\nfor i ___ range(3):\n    total += i\nprint(total)",
+                expected: "3",
+                blankAnswer: "in",
+                explanation: "The `in` keyword is used in `for` loops to iterate through iterable objects such as ranges, lists, or strings."
+            },
+            {
+                id: 6, category: 4, level: "Intermediate",
+                prompt: "Control loop execution by prematurely terminating iteration.",
+                code: "for n in range(5):\n    if n == 3:\n        ___\n    print(n, end=' ')",
+                expected: "0 1 2",
+                blankAnswer: "break",
+                explanation: "The `break` statement immediately exits the innermost enclosing loop, halting further iterations."
+            },
+            // Cat 5
+            {
+                id: 7, category: 5, level: "Beginner",
+                prompt: "Define a simple reusable function using the `def` keyword.",
+                code: "___ greet(name):\n    return f'Hello {name}'\nprint(greet('Alice'))",
+                expected: "Hello Alice",
+                blankAnswer: "def",
+                explanation: "Python functions are defined using the `def` keyword followed by the function name, parameter list, and a colon."
+            },
+            {
+                id: 8, category: 5, level: "Intermediate",
+                prompt: "Use a default parameter value in a function definition.",
+                code: "def power(base, exp=2):\n    return base ** exp\nprint(power(___))",
+                expected: "9",
+                blankAnswer: "3",
+                explanation: "When calling `power(3)`, the default argument `exp=2` is used, computing $3^2 = 9$."
+            },
+            // Cat 6
+            {
+                id: 9, category: 6, level: "Beginner",
+                prompt: "Append a new element to the end of a list.",
+                code: "fruits = ['apple', 'banana']\nfruits.___('orange')\nprint(fruits)",
+                expected: "['apple', 'banana', 'orange']",
+                blankAnswer: "append",
+                explanation: "The `.append()` method mutates a list in place by adding a single element to its end."
+            },
+            {
+                id: 10, category: 6, level: "Intermediate",
+                prompt: "Slice a list to extract a sub-portion of elements.",
+                code: "numbers = [10, 20, 30, 40, 50]\nsub = numbers[1:4]\nprint(___)transformation",
+                expected: "[20, 30, 40]",
+                blankAnswer: "sub",
+                explanation: "List slicing `[start:end]` extracts elements from index `start` up to, but not including, index `end`."
+            },
+            // Cat 7
+            {
+                id: 11, category: 7, level: "Beginner",
+                prompt: "Access a value in a dictionary using its corresponding key.",
+                code: "student = {'name': 'Bob', 'age': 20}\nprint(student[___])",
+                expected: "Bob",
+                blankAnswer: "'name'",
+                explanation: "Dictionary values are retrieved by passing their unique hashable keys inside square brackets `[]`."
+            },
+            {
+                id: 12, category: 7, level: "Intermediate",
+                prompt: "Retrieve all keys from a dictionary as a view object.",
+                code: "data = {'a': 1, 'b': 2}\nprint(list(data.___()))",
+                expected: "['a', 'b']",
+                blankAnswer: "keys",
+                explanation: "The `.keys()` method returns a view object displaying a list of all keys present in the dictionary."
+            },
+            // Cat 8
+            {
+                id: 13, category: 8, level: "Intermediate",
+                prompt: "Open a file safely using a context manager.",
+                code: "___ open('test.txt', 'w') as f:\n    f.write('Hello')",
+                expected: "with",
+                explanation: "The `with` statement creates a runtime context manager that ensures files are properly closed after block execution.",
+                blankAnswer: "with"
+            },
+            {
+                id: 14, category: 8, level: "Advanced",
+                prompt: "Read all lines from an open file object into a list.",
+                code: "# Assuming file has lines\nlines = file_obj.___()\nprint(lines)",
+                expected: "['line1\\n', 'line2\\n']",
+                blankAnswer: "readlines",
+                explanation: "The `.readlines()` method reads all lines from a file stream and returns them as a list of strings."
+            },
+            // Cat 9
+            {
+                id: 15, category: 9, level: "Intermediate",
+                prompt: "Catch a specific runtime exception during execution.",
+                code: "try:\n    x = 1 / 0\n___ ZeroDivisionError:\n    print('Caught')",
+                expected: "Caught",
+                blankAnswer: "except",
+                explanation: "The `except` block catches specified exceptions raised within the preceding `try` block, preventing program crashes."
+            },
+            {
+                id: 16, category: 9, level: "Advanced",
+                prompt: "Ensure execution of cleanup code regardless of exceptions using `finally`.",
+                code: "try:\n    print('Run')\nfinally:\n    ___('Cleanup')",
+                expected: "print",
+                blankAnswer: "print",
+                explanation: "The `finally` block executes unconditionally whether an exception occurred or was handled, perfect for resource release."
+            },
+            // Additional progressive items across categories 2-9 to reach 20
+            {
+                id: 17, category: 2, level: "Advanced",
+                prompt: "Perform integer floor division discarding any fractional remainder.",
+                code: "val = 17 ___ 5\nprint(val)",
+                expected: "3",
+                blankAnswer: "//",
+                explanation: "The `//` operator performs floor division, rounding down to the nearest integer."
+            },
+            {
+                id: 18, category: 4, level: "Advanced",
+                prompt: "Create a concise list comprehension transforming elements.",
+                code: "squares = [x ___ 2 for x in range(3)]\nprint(squares)",
+                expected: "[0, 1, 4]",
+                blankAnswer: "**",
+                explanation: "List comprehensions allow building lists concisely; `x ** 2` squares each integer in the range."
+            },
+            {
+                id: 19, category: 6, level: "Advanced",
+                prompt: "Remove duplicate elements from a list by casting to a set.",
+                code: "items = [1, 2, 2, 3, 3, 3]\nunique = ___(items)\nprint(sorted(list(unique)))",
+                expected: "[1, 2, 3]",
+                blankAnswer: "set",
+                explanation: "Python `set` collections store only unique hashable elements, automatically filtering duplicates."
+            },
+            {
+                id: 20, category: 7, level: "Advanced",
+                prompt: "Safely get a dictionary value with a fallback default if missing.",
+                code: "config = {'debug': True}\nval = config.get('timeout', ___)\nprint(val)",
+                expected: "30",
+                blankAnswer: "30",
+                explanation: "The `.get(key, default)` method returns the value for `key` if present, otherwise returning the specified default value (`30`)."
+            }
+        ];
+
+        let currentIndex = 0;
+        let userAnswers = {};
+        let timerInterval = null;
+        let timeLeft = 600; // 10 minutes
+
+        function startAssessment() {
+            document.getElementById('view-welcome').classList.add('hidden');
+            document.getElementById('view-quiz').classList.remove('hidden');
+            document.getElementById('timer-display').classList.remove('hidden');
+            document.getElementById('timer-display').classList.add('flex');
+            
+            startTimer();
+            loadQuestion();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                document.getElementById('time-left').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishAssessment();
+                }
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= questions.length) {
+                finishAssessment();
+                return;
+            }
+
+            const q = questions[currentIndex];
+            document.getElementById('current-q-num').textContent = currentIndex + 1;
+            document.getElementById('question-category').textContent = categories[q.category];
+            document.getElementById('question-level').textContent = q.level;
+            document.getElementById('question-prompt').textContent = q.prompt;
+            document.getElementById('code-snippet').textContent = q.code;
+            document.getElementById('expected-output').textContent = q.expected;
+            
+            const input = document.getElementById('user-answer');
+            input.value = userAnswers[currentIndex] || '';
+            input.focus();
+        }
+
+        function submitAnswer(event) {
+            event.preventDefault();
+            const input = document.getElementById('user-answer');
+            userAnswers[currentIndex] = input.value.trim();
+
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                loadQuestion();
+            } else {
+                finishAssessment();
+            }
+        }
+
+        function calculateCloseness(userAns, correctAns) {
+            if (!userAns) return 0;
+            const u = userAns.toLowerCase();
+            const c = correctAns.toLowerCase();
+            if (u === c) return 1.0;
+            
+            // Basic Levenshtein distance similarity approximation
+            let longer = u.length > c.length ? u : c;
+            let shorter = u.length > c.length ? c : u;
+            if (longer.length === 0) return 1.0;
+            
+            let editDistance = 0;
+            let i = 0;
+            while (i < shorter.length) {
+                if (shorter[i] !== longer[i]) editDistance++;
+                i++;
+            }
+            editDistance += (longer.length - shorter.length);
+            
+            let score = (longer.length - editDistance) / longer.length;
+            return Math.max(0, score);
+        }
+
+        function finishAssessment() {
+            clearInterval(timerInterval);
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('timer-display').classList.add('hidden');
+            document.getElementById('view-results').classList.remove('hidden');
+
+            let totalRawScore = 0; // out of 100 (20 questions * 5 pts)
+            let categoryScores = {};
+            let categoryCounts = {};
+
+            for (let cat = 2; cat <= 9; cat++) {
+                categoryScores[cat] = 0;
+                categoryCounts[cat] = 0;
+            }
+
+            let reviewHTML = '';
+
+            questions.forEach((q, idx) => {
+                let ans = userAnswers[idx] || "";
+                let closeness = calculateCloseness(ans, q.blankAnswer);
+                let qPoints = closeness * 5; // max 5 points per question
+                totalRawScore += qPoints;
+
+                categoryScores[q.category] += qPoints;
+                categoryCounts[q.category] += 5; // max 5 points per question per category roughly
+
+                let isCorrectExact = (ans.toLowerCase() === q.blankAnswer.toLowerCase());
+                
+                reviewHTML += `
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-3">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-cyan-400 bg-cyan-950 px-2.5 py-1 rounded border border-cyan-800/50">Q${idx + 1}: ${categories[q.category]}</span>
+                            <span class="text-xs px-2.5 py-1 rounded font-mono ${isCorrectExact ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : (closeness > 0.5 ? 'bg-amber-950 text-amber-400 border border-amber-800' : 'bg-rose-950 text-rose-400 border border-rose-800')}">
+                                Earned: ${qPoints.toFixed(1)} / 5 pts
+                            </span>
+                        </div>
+                        <div class="text-slate-300 font-medium text-sm">${q.prompt}</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
+                            <div class="bg-slate-900 p-3 rounded border border-slate-800">
+                                <span class="text-xs text-slate-400 block mb-1">Your Answer:</span>
+                                <span class="text-white">${ans ? escapeHTML(ans) : '<em class="text-slate-400">No answer given</em>'}</span>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded border border-slate-800">
+                                <span class="text-xs text-slate-400 block mb-1">Correct Answer:</span>
+                                <span class="text-emerald-400 font-bold">${escapeHTML(q.blankAnswer)}</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-400 bg-slate-900/60 p-3 rounded border border-slate-800/80 leading-relaxed">
+                            <strong class="text-slate-200">Detailed Explanation:</strong> ${q.explanation}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Convert to 1-100 score
+            let finalScore = Math.round(Math.max(1, Math.min(100, totalRawScore)));
+            let rawCorrectCount = questions.filter(q => (userAnswers[q.id - 1] || "").toLowerCase() === q.blankAnswer.toLowerCase()).length;
+
+            document.getElementById('res-score').textContent = `${finalScore} / 100`;
+            document.getElementById('res-raw').textContent = `${rawCorrectCount} / 20`;
+
+            // Threshold classification: score <=40 beginner, >40 intermediate, >=70 advanced
+            let levelClass = "Beginner";
+            let levelColor = "text-amber-400";
+            if (finalScore >= 70) {
+                levelClass = "Advanced";
+                levelColor = "text-emerald-400";
+            } else if (finalScore > 40) {
+                levelClass = "Intermediate";
+                levelColor = "text-cyan-400";
+            }
+
+            const levelEl = document.getElementById('res-level');
+            levelEl.textContent = levelClass;
+            levelEl.className = `text-xl font-bold ${levelColor} mt-1 uppercase tracking-wider`;
+
+            // Determine categories to improve
+            let catPerformances = [];
+            for (let cat = 2; cat <= 9; cat++) {
+                let maxPossible = categoryCounts[cat] > 0 ? categoryCounts[cat] : 5;
+                let pct = (categoryScores[cat] / maxPossible) * 100;
+                catPerformances.push({ cat: cat, name: categories[cat], pct: pct });
+            }
+            catPerformances.sort((a, b) => a.pct - b.pct);
+
+            let weakestCats = catPerformances.slice(0, 3);
+            
+            let adviceHTML = `
+                <p>Based on your score of <strong class="text-white">${finalScore}/100</strong>, your skill tier is classified as <strong class="${levelColor}">${levelClass}</strong>.</p>
+                <p><strong class="text-slate-200">Overall Improvement Advice:</strong> ${getOverallAdvice(finalScore, levelClass)}</p>
+                <div class="mt-4 pt-3 border-t border-slate-800">
+                    <strong class="text-slate-200 block mb-2">Priority Categories to Focus On (Categories 2 to 9):</strong>
+                    <ul class="space-y-2">
+            `;
+
+            weakestCats.forEach(wc => {
+                adviceHTML += `
+                    <li class="flex items-center justify-between bg-slate-900 p-2.5 rounded border border-slate-800 text-xs font-mono">
+                        <span class="text-cyan-300 font-medium">Cat ${wc.cat}: ${wc.name}</span>
+                        <span class="text-slate-400">Score: ${wc.pct.toFixed(0)}%</span>
+                    </li>
+                `;
+            });
+
+            adviceHTML += `
+                    </ul>
+                    <p class="mt-3 text-xs text-slate-400">Target your practice sessions around these specific topic areas by writing small sandbox scripts, reviewing syntax documentation, and solving targeted coding exercises.</p>
+                </div>
+            `;
+
+            document.getElementById('res-advice').innerHTML = adviceHTML;
+            document.getElementById('review-list').innerHTML = reviewHTML;
+        }
+
+        function getOverallAdvice(score, level) {
+            if (level === "Advanced") {
+                return "Fantastic performance! You demonstrate a robust grasp of foundational and intermediate Python concepts. To reach expert level, focus on advanced object-oriented programming (OOP), decorators, generators, algorithms, and concurrency modules.";
+            } else if (level === "Intermediate") {
+                return "Good job! You have a solid grasp of core syntax, loops, and data structures. To transition to advanced proficiency, practice more complex dictionary operations, robust error handling hierarchies, context managers, and modular programming patterns.";
+            } else {
+                return "You are building your foundation in Python! Focus heavily on basic variable assignments, understanding conditional branching syntax (`if/elif/else`), mastering loop iterations (`for`/`while`), and correctly invoking built-in methods on lists and strings.";
+            }
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>

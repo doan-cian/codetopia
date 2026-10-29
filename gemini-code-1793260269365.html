@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Quiz Challenge</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --accent-color: #0088d1;
+            --accent-hover: #006064;
+            --border-color: #e0e0e0;
+            --code-bg: #272822;
+            --code-text: #f8f8f2;
+            --correct-color: #2e7d32;
+            --incorrect-color: #c62828;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .question-card {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+            background-color: #fff;
+        }
+
+        .question-header {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .section-badge {
+            font-size: 0.85em;
+            background-color: #e0f7fa;
+            color: #006064;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .input-group {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 1em;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: "Consolas", "Courier New", monospace;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 4px rgba(0, 136, 209, 0.3);
+        }
+
+        button.submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button.submit-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .result-panel {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .result-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section-score-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 1.05em;
+        }
+
+        .section-score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-score-item:nth-child(even) {
+            background-color: #f0f0f0;
+        }
+
+        .feedback-text {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .feedback-correct {
+            color: var(--correct-color);
+        }
+
+        .feedback-incorrect {
+            color: var(--incorrect-color);
+        }
+
+        .blank-highlight {
+            color: #ffb74d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Python Knowledge Quiz</h1>
+    <p class="subtitle">Fill in the exact missing code to satisfy the printed output.</p>
+
+    <form id="quiz-form">
+        <div id="quiz-questions"></div>
+        <button type="button" class="submit-btn" onclick="evaluateQuiz()">Submit Answers</button>
+    </form>
+
+    <div id="result-panel" class="result-panel">
+        <div id="result-summary" class="result-header"></div>
+        <ul id="section-breakdown" class="section-score-list"></ul>
+        <button type="button" class="submit-btn" onclick="restartQuiz()">Try Again (New Random Questions)</button>
+    </div>
+</div>
+
+<script>
+// Pool of strictly validated questions ensuring exactly 1 correct answer based on Day 1 Python Material
+const questionPool = {
+    "2. Numeric operations": [
+        {
+            code: "a = 7\nb = 3\nresult = a ??? b\nprint(result) # Output: 2",
+            answer: "//",
+            instruction: "Fill in the integer division operator:"
+        },
+        {
+            code: "a = 7\nb = 3\nresult = a ??? b\nprint(result) # Output: 1",
+            answer: "%",
+            instruction: "Fill in the modulo operator:"
+        },
+        {
+            code: "a = 2\nb = 3\nresult = a ??? b\nprint(result) # Output: 8",
+            answer: "**",
+            instruction: "Fill in the exponentiation operator:"
+        },
+        {
+            code: "a = \"123.4\"\nresult = ???(float(a))\nprint(result) # Output: 123",
+            answer: "int",
+            instruction: "Fill in the built-in function to convert float to integer:"
+        }
+    ],
+    "3. String operations": [
+        {
+            code: "s = \"python\"\nresult = s.???()\nprint(result) # Output: PYTHON",
+            answer: "upper",
+            instruction: "Fill in the string method to convert text to uppercase:"
+        },
+        {
+            code: "s = \"  hello  \"\nresult = s.???()\nprint(result) # Output: hello",
+            answer: "strip",
+            instruction: "Fill in the string method to remove leading/trailing whitespace:"
+        },
+        {
+            code: "s = \"apple,banana,orange\"\nresult = s.???(\",\")\nprint(result) # Output: ['apple', 'banana', 'orange']",
+            answer: "split",
+            instruction: "Fill in the string method to split text into a list by comma:"
+        },
+        {
+            code: "s = \"Hello World\"\nresult = s.???(\"World\", \"Python\")\nprint(result) # Output: Hello Python",
+            answer: "replace",
+            instruction: "Fill in the string method to replace a substring:"
+        }
+    ],
+    "4. Boolean operations": [
+        {
+            code: "a = True\nresult = ??? a\nprint(result) # Output: False",
+            answer: "not",
+            instruction: "Fill in the boolean logical negation operator:"
+        },
+        {
+            code: "a = 5\nb = 10\nresult = (a < 10) ??? (b > 5)\nprint(result) # Output: True (requires both conditions to be True)",
+            answer: "and",
+            instruction: "Fill in the logical operator that returns True only if both conditions are True:"
+        },
+        {
+            code: "a = 5\nresult = type(a == 5)\nprint(result) # Output: <class '???'>",
+            answer: "bool",
+            instruction: "Fill in the data type name for boolean values:"
+        }
+    ],
+    "5. Variables and data types": [
+        {
+            code: "x = 10.5\nresult = ???(x)\nprint(result) # Output: <class 'float'>",
+            answer: "type",
+            instruction: "Fill in the function used to inspect an object's data type:"
+        },
+        {
+            code: "x = 25\nresult = ???(x)\nprint(result) # Output: '25'",
+            answer: "str",
+            instruction: "Fill in the type conversion function to convert an integer to a string:"
+        },
+        {
+            code: "a = [1, 2, 3]\nb = a\nresult = a ??? b\nprint(result) # Output: True (checks if both variables refer to the exact same object)",
+            answer: "is",
+            instruction: "Fill in the identity operator:"
+        },
+        {
+            code: "x = None\nresult = x ??? None\nprint(result) # Output: True",
+            answer: "is",
+            instruction: "Fill in the identity operator commonly used to test if a variable is None:"
+        }
+    ],
+    "6. Collections": [
+        {
+            code: "my_list = [10, 20, 30]\nmy_list.???(40)\nprint(my_list) # Output: [10, 20, 30, 40]",
+            answer: "append",
+            instruction: "Fill in the list method to add a single element to the end:"
+        },
+        {
+            code: "my_dict = {\"name\": \"Alice\", \"age\": 25}\nresult = my_dict.???()\nprint(list(result)) # Output: ['name', 'age']",
+            answer: "keys",
+            instruction: "Fill in the dictionary method that retrieves all dictionary keys:"
+        },
+        {
+            code: "my_list = [10, 20, 30, 40]\nresult = ???(my_list)\nprint(result) # Output: 4",
+            answer: "len",
+            instruction: "Fill in the built-in function to count the number of items in a collection:"
+        },
+        {
+            code: "my_tuple = (1, 2, 3)\n# Extract length\nresult = ???(my_tuple)\nprint(result) # Output: 3",
+            answer: "len",
+            instruction: "Fill in the function to get the number of elements in a tuple:"
+        },
+        {
+            code: "my_dict = {\"a\": 1, \"b\": 2}\nresult = my_dict.???()\nprint(list(result)) # Output: [1, 2]",
+            answer: "values",
+            instruction: "Fill in the dictionary method that retrieves all dictionary values:"
+        }
+    ],
+    "7. Control flow statements": [
+        {
+            code: "for i in ???(3):\n    print(i)\n# Output:\n# 0\n# 1\n# 2",
+            answer: "range",
+            instruction: "Fill in the built-in sequence generator function used in loops:"
+        },
+        {
+            code: "x = 10\nif x > 15:\n    print(\"Greater\")\n???:\n    print(\"Smaller or Equal\")",
+            answer: "else",
+            instruction: "Fill in the control statement keyword executed when the 'if' condition is False:"
+        },
+        {
+            code: "for i in range(5):\n    if i == 2:\n        ??? # Stop loop execution entirely\n    print(i)",
+            answer: "break",
+            instruction: "Fill in the loop control keyword that immediately terminates the loop:"
+        },
+        {
+            code: "x = 5\nif x > 10:\n    print(\"A\")\n??? x == 5:\n    print(\"B\")",
+            answer: "elif",
+            instruction: "Fill in the conditional keyword used for additional test conditions:"
+        }
+    ],
+    "8. Functions": [
+        {
+            code: "??? greet(name):\n    return f\"Hello, {name}\"\n\nprint(greet(\"Anna\")) # Output: Hello, Anna",
+            answer: "def",
+            instruction: "Fill in the keyword used to define a custom function:"
+        },
+        {
+            code: "def add(a, b):\n    ??? a + b\n\nresult = add(3, 4)\nprint(result) # Output: 7",
+            answer: "return",
+            instruction: "Fill in the keyword used to pass back a result from a function:"
+        },
+        {
+            code: "numbers = [3, 1, 4, 2]\nresult = ???(numbers)\nprint(result) # Output: [1, 2, 3, 4]",
+            answer: "sorted",
+            instruction: "Fill in the built-in function that returns a new sorted list from an iterable:"
+        },
+        {
+            code: "numbers = [5, 2, 9, 1]\nresult = ???(numbers)\nprint(result) # Output: 9",
+            answer: "max",
+            instruction: "Fill in the built-in function that returns the largest item:"
+        }
+    ]
+};
+
+// Section requirements per rule 3
+const sectionRequirements = {
+    "2. Numeric operations": 2,
+    "3. String operations": 3,
+    "4. Boolean operations": 2,
+    "5. Variables and data types": 3,
+    "6. Collections": 4,
+    "7. Control flow statements": 3,
+    "8. Functions": 3
+};
+
+let activeQuestions = [];
+
+function getRandomItems(arr, count) {
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
+function initQuiz() {
+    activeQuestions = [];
+    const questionsContainer = document.getElementById("quiz-questions");
+    questionsContainer.innerHTML = "";
+    document.getElementById("result-panel").style.display = "none";
+    document.getElementById("quiz-form").style.display = "block";
+
+    let globalIndex = 0;
+
+    for (const [section, count] of Object.entries(sectionRequirements)) {
+        const selected = getRandomItems(questionPool[section], count);
+        selected.forEach(q => {
+            const questionObj = {
+                id: globalIndex,
+                section: section,
+                code: q.code,
+                answer: q.answer,
+                instruction: q.instruction
+            };
+            activeQuestions.push(questionObj);
+
+            // Render HTML
+            const card = document.createElement("div");
+            card.className = "question-card";
+            card.innerHTML = `
+                <div class="question-header">
+                    <span>Question ${globalIndex + 1}</span>
+                    <span class="section-badge">${section}</span>
+                </div>
+                <div>${q.instruction}</div>
+                <pre>${escapeHtml(q.code)}</pre>
+                <div class="input-group">
+                    <label for="q-${globalIndex}"><strong>??? = </strong></label>
+                    <input type="text" id="q-${globalIndex}" autocomplete="off" spellcheck="false" placeholder="Type exact answer here">
+                </div>
+                <div id="feedback-${globalIndex}" class="feedback-text"></div>
+            `;
+            questionsContainer.appendChild(card);
+            globalIndex++;
+        });
+    }
+}
+
+function escapeHtml(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function evaluateQuiz() {
+    let totalCorrect = 0;
+    const sectionScores = {
+        "2. Numeric operations": { correct: 0, total: 2 },
+        "3. String operations": { correct: 0, total: 3 },
+        "4. Boolean operations": { correct: 0, total: 2 },
+        "5. Variables and data types": { correct: 0, total: 3 },
+        "6. Collections": { correct: 0, total: 4 },
+        "7. Control flow statements": { correct: 0, total: 3 },
+        "8. Functions": { correct: 0, total: 3 }
+    };
+
+    activeQuestions.forEach(q => {
+        const inputElem = document.getElementById(`q-${q.id}`);
+        const feedbackElem = document.getElementById(`feedback-${q.id}`);
+        const userAnswer = inputElem.value.trim();
+
+        if (userAnswer === q.answer) {
+            totalCorrect++;
+            sectionScores[q.section].correct++;
+            feedbackElem.className = "feedback-text feedback-correct";
+            feedbackElem.innerText = "✓ Correct!";
+        } else {
+            feedbackElem.className = "feedback-text feedback-incorrect";
+            feedbackElem.innerText = `✗ Incorrect. Correct answer: ${q.answer}`;
+        }
+        inputElem.disabled = true;
+    });
+
+    const scorePoints = totalCorrect * 5; // 20 questions = 100 max points
+
+    // Display total score and breakdown as formatted in condition 4
+    const summaryElem = document.getElementById("result-summary");
+    summaryElem.innerText = `Total: ${scorePoints} points          (${totalCorrect}/20)`;
+
+    const breakdownElem = document.getElementById("section-breakdown");
+    breakdownElem.innerHTML = "";
+
+    for (const [section, data] of Object.entries(sectionScores)) {
+        const li = document.createElement("li");
+        li.className = "section-score-item";
+        
+        const nameSpan = document.createElement("span");
+        nameSpan.innerText = section;
+        
+        const scoreSpan = document.createElement("span");
+        scoreSpan.innerText = `${data.correct}/${data.total}`;
+
+        li.appendChild(nameSpan);
+        li.appendChild(scoreSpan);
+        breakdownElem.appendChild(li);
+    }
+
+    document.getElementById("result-panel").style.display = "block";
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+    initQuiz();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Start game on load
+window.onload = initQuiz;
+</script>
+
+</body>
+</html>
